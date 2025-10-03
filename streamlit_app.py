@@ -17,7 +17,10 @@ st.set_page_config(
 @st.cache_resource
 def get_client():
     try:
-        api_key = st.secrets["COHERE_API_KEY"]
+        # Streamlit Secrets should be set like this in the dashboard:
+        # [general]
+        # COHERE_API_KEY = "your_key_here"
+        api_key = st.secrets["general"]["COHERE_API_KEY"]
         return cohere.Client(api_key)
     except KeyError:
         st.error("Missing COHERE_API_KEY in Streamlit Secrets!")
@@ -63,11 +66,11 @@ for msg in st.session_state.messages:
         )
 
 # User input
-if prompt := st.chat_input("Type your question..."):
+prompt = st.chat_input("Type your question...")
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.experimental_rerun()
 
-# Process last user message
+# Process the last user message (without rerun)
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     last_prompt = st.session_state.messages[-1]["content"]
     try:
@@ -78,7 +81,6 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             )
             answer = response.text
             st.session_state.messages.append({"role": "assistant", "content": answer})
-            st.experimental_rerun()
     except Exception as e:
         st.error(f"Error: {str(e)}")
 
@@ -89,4 +91,3 @@ with st.sidebar:
     st.write("An AI-powered chatbot built with Cohere and Streamlit. Ask anything and get instant answers.")
     if st.button("Clear Chat"):
         st.session_state.messages = []
-        st.experimental_rerun()
