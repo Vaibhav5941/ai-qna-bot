@@ -57,9 +57,9 @@ pip install -r requirements.txt
 
 3. Add your Cohere API key:
 
-  a. Create a .env file in the project root
+   a. Create a .env file in the project root
 
-  b. Add your key:
+   b. Add your key:
      COHERE_API_KEY=your_key_here
 
 4. Run the bot:
