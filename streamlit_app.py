@@ -3,9 +3,7 @@ import cohere
 import os
 from dotenv import load_dotenv
 
-# Only for local testing
-if os.getenv("STREAMLIT_ENV") != "cloud":
-    load_dotenv()
+load_dotenv()
 
 st.set_page_config(
     page_title="AI Q&A Bot",
@@ -13,41 +11,89 @@ st.set_page_config(
     layout="centered"
 )
 
-# Get Cohere client
 @st.cache_resource
 def get_client():
-    try:
-        # Streamlit Secrets should be set like this in the dashboard:
-        # [general]
-        # COHERE_API_KEY = "your_key_here"
-        api_key = st.secrets["general"]["COHERE_API_KEY"]
-        return cohere.Client(api_key)
-    except KeyError:
-        st.error("Missing COHERE_API_KEY in Streamlit Secrets!")
+    api_key = st.secrets["COHERE_API_KEY"]
+    if not api_key:
+        st.error("Missing COHERE_API_KEY in Streamlit Secrets")
         st.stop()
+    return cohere.Client(api_key)
 
-client = get_client()
 
-# Initialize chat messages
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-USER_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png"
-BOT_AVATAR = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
+st.markdown(
+    """
+    <style>
+        .stApp {
+            background-color: #f9fafb;
+        }
+        .chat-row {
+            display: flex;
+            align-items: flex-start;
+            margin: 12px 0;
+        }
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.5;
+            font-size: 16px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+            word-wrap: break-word;
+        }
+        .user-msg {
+            background-color: #2563eb;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+            animation: fadeInRight 0.3s ease;
+        }
+        .bot-msg {
+            background-color: #f3f4f6;
+            color: #111827;
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+            animation: fadeInLeft 0.3s ease;
+        }
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            margin: 0 8px;
+            object-fit: cover;
+        }
+        @keyframes fadeInRight {
+            from {opacity: 0; transform: translateX(30px);}
+            to {opacity: 1; transform: translateX(0);}
+        }
+        @keyframes fadeInLeft {
+            from {opacity: 0; transform: translateX(-30px);}
+            to {opacity: 1; transform: translateX(0);}
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("AI Q&A Bot")
 st.caption("Powered by Cohere + Streamlit")
 
-# Render previous messages
+client = get_client()
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+
+USER_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+BOT_AVATAR = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
+
+# Render chat history
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(
             f"""
-            <div style="display:flex;justify-content:flex-end;margin:12px 0;">
-                <div style="background:#2563eb;color:white;padding:12px 16px;border-radius:18px;max-width:75%;">
-                    {msg['content']}
-                </div>
-                <img src="{USER_AVATAR}" style="width:38px;height:38px;border-radius:50%;margin-left:8px;">
+            <div class="chat-row" style="justify-content: flex-end;">
+                <div class="chat-bubble user-msg">{msg['content']}</div>
+                <img src="{USER_AVATAR}" class="avatar">
             </div>
             """,
             unsafe_allow_html=True
@@ -55,32 +101,44 @@ for msg in st.session_state.messages:
     else:
         st.markdown(
             f"""
-            <div style="display:flex;align-items:flex-start;margin:12px 0;">
-                <img src="{BOT_AVATAR}" style="width:38px;height:38px;border-radius:50%;margin-right:8px;">
-                <div style="background:#f3f4f6;color:#111827;padding:12px 16px;border-radius:18px;max-width:75%;">
-                    {msg['content']}
-                </div>
+            <div class="chat-row">
+                <img src="{BOT_AVATAR}" class="avatar">
+                <div class="chat-bubble bot-msg">{msg['content']}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
 # User input
-prompt = st.chat_input("Type your question...")
-if prompt:
+if prompt := st.chat_input("Type your question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-
-# Process the last user message (without rerun)
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    last_prompt = st.session_state.messages[-1]["content"]
+    st.markdown(
+        f"""
+        <div class="chat-row" style="justify-content: flex-end;">
+            <div class="chat-bubble user-msg">{prompt}</div>
+            <img src="{USER_AVATAR}" class="avatar">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     try:
         with st.spinner("Thinking..."):
             response = client.chat(
-                message=last_prompt,
+                message=prompt,
                 model="command-a-03-2025"
             )
             answer = response.text
+            # Store bot reply (Markdown supported in Streamlit)
             st.session_state.messages.append({"role": "assistant", "content": answer})
+            st.markdown(
+                f"""
+                <div class="chat-row">
+                    <img src="{BOT_AVATAR}" class="avatar">
+                    <div class="chat-bubble bot-msg">{answer}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
     except Exception as e:
         st.error(f"Error: {str(e)}")
 
@@ -91,3 +149,4 @@ with st.sidebar:
     st.write("An AI-powered chatbot built with Cohere and Streamlit. Ask anything and get instant answers.")
     if st.button("Clear Chat"):
         st.session_state.messages = []
+        st.rerun()
