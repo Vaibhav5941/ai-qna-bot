@@ -27,7 +27,7 @@ Resources That Saved Me:
    1. Python Official Docs
    2. Cohere API Documentation
    3. Streamlit Documentation
-   4. Render Deployment Guides
+   4. streamlit community cloud Deployment Guides
    5. Stack Overflow for debugging
    6. ChatGPT & Claude for code examples
 
@@ -77,7 +77,7 @@ This project is just the beginning. Future improvements I’d love to add:
 3. Rate limiting for smooth performance
 4. Better error handling
 5. Unit tests to ensure reliability
-6. Docker container for simple deployment anywhere
+6. streamlit community cloud for simple deployment 
 
 
 Got Questions? 
