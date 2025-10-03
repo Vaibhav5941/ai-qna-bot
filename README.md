@@ -58,6 +58,7 @@ pip install -r requirements.txt
 3. Add your Cohere API key:
 
   a. Create a .env file in the project root
+
   b. Add your key:
      COHERE_API_KEY=your_key_here
 
@@ -69,6 +70,8 @@ pip install -r requirements.txt
    b. Streamlit web UI:
     streamlit run streamlit_app.py
 
+5. streamlit community cloud for simple deployment https://ai-qna-bot.streamlit.app/
+
 Next Steps ✨
 ==========
 This project is just the beginning. Future improvements I’d love to add:
@@ -77,8 +80,6 @@ This project is just the beginning. Future improvements I’d love to add:
 3. Rate limiting for smooth performance
 4. Better error handling
 5. Unit tests to ensure reliability
-6. streamlit community cloud for simple deployment 
-
 
 Got Questions? 
 Open an issue on GitHub—I’d love to hear your thoughts, suggestions, or even just say hi!
