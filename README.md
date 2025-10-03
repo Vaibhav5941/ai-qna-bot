@@ -47,12 +47,12 @@ How to Try It Yourself:
 
 1. Clone the repo:
 
-git clone https://github.com/Vaibhav5941/ai-qna-bot.git
-cd ai-qna-bot
+   git clone https://github.com/Vaibhav5941/ai-qna-bot.git
+   cd ai-qna-bot
 
 2. Install dependencies:
 
-pip install -r requirements.txt
+   pip install -r requirements.txt
 
 
 3. Add your Cohere API key:
